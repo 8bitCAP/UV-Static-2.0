@@ -4,90 +4,36 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UV Static v2 - Full Proxy</title>
+    <!-- Copy all stylesheet links from index.html -->
     <link rel="stylesheet" href="style/global.css" />
     <link rel="stylesheet" href="style/browser.css" />
+    <!-- If index.html uses additional stylesheets, add them here -->
+
+    <!-- Copy all script tags from index.html, in the same order -->
     <script defer src="scripts/lstimer.js"></script>
-    <script
-      type="text/javascript"
-      src="https://cdn.jsdelivr.net/gh/vanjs-org/van/public/van-1.5.2.nomodule.min.js"
-    ></script>
-    <script
-      type="module"
-      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
-    ></script>
-    <script
-      nomodule
-      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/gh/vanjs-org/van/public/van-1.5.2.nomodule.min.js" type="text/javascript"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <script src="uv/uv.bundle.js" defer></script>
     <script src="uv/uv.config.js" defer></script>
     <script src="scripts/tabs.mjs" type="module" defer></script>
+    <!-- Add any other scripts from index.html, such as index.js, if present -->
+    <!-- For example: -->
+    <!-- <script src="scripts/index.js" defer></script> -->
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/gh/tf7software/Font-Awesome-pro-cdn@main/js/all.js"></script>
     <style>
-      html, body {
-        width: 100vw;
-        height: 100vh;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        background: #18181a;
-      }
-      #full-proxy-main {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: #18181a;
-        z-index: 10;
-        display: flex;
-        align-items: stretch;
-        justify-content: flex-end;
-      }
-      #full-proxy-box {
-        width: 100vw;
-        max-width: 100vw;
-        height: 100vh;
-        background: #18181a;
-        box-shadow: none;
-        z-index: 20;
-        display: flex;
-        flex-direction: column;
-      }
-      #proxy-iframe {
-        flex: 1 1 0%;
-        width: 100%;
-        height: 100%;
-        border: none;
-        background: #18181a;
-        min-height: 0;
-        min-width: 0;
-      }
-      #hidden-proxy-form {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 1;
-        opacity: 0;
-        pointer-events: none;
-      }
-      #hidden-proxy-form input,
-      #hidden-proxy-form button {
-        display: none;
-      }
+      /* ... keep your CSS ... */
     </style>
   </head>
   <body>
-    <!-- Hidden Proxy Form (for compatibility with legacy logic if needed) -->
+    <!-- ... keep your HTML as is ... -->
+
     <form id="hidden-proxy-form" autocomplete="off" tabindex="-1">
       <input type="text" id="hidden-proxy-input" name="url" autocomplete="off" />
       <button type="submit" id="hidden-proxy-submit"></button>
     </form>
-
-    <!-- Main Proxy Content -->
     <div id="full-proxy-main">
       <div id="full-proxy-box">
         <iframe
@@ -99,8 +45,10 @@
       </div>
     </div>
 
+    <!-- Copy any inline scripts from index.html if they affect page behavior -->
+
     <script>
-      // Returns the URL part after the ?, if it's a valid URL
+      // Make sure this matches any relevant logic from index.html
       function getQueryUrl() {
         const q = window.location.search.replace(/^\?/, '');
         if (q && (q.startsWith("http://") || q.startsWith("https://"))) {
@@ -110,12 +58,7 @@
       }
 
       function submitProxyForm(url) {
-        // If your proxy works by form submission, you could submit the hidden form here.
-        // For UV Static, it's common to set iframe src to /service/<encoded-url>
-        // Here, we'll use the UV encoding logic if available, or just direct URL if not.
         if (window.__uv$config && window.__uv$config.prefix) {
-          // UV Static logic
-          // You might want to use __uv$config.encodeUrl(url) if your env provides it.
           let encoded = '';
           if (window.__uv$config.encodeUrl) {
             encoded = window.__uv$config.prefix + window.__uv$config.encodeUrl(url);
@@ -124,7 +67,6 @@
           }
           document.getElementById('proxy-iframe').src = encoded;
         } else {
-          // Fallback: just load the url directly
           document.getElementById('proxy-iframe').src = url;
         }
       }
@@ -133,9 +75,6 @@
         const url = getQueryUrl();
         if (url) {
           document.getElementById('hidden-proxy-input').value = url;
-          // If you'd like to use the form method, uncomment below:
-          // document.getElementById('hidden-proxy-form').submit();
-          // Instead, use the current UV proxy logic to embed the site:
           submitProxyForm(url);
         }
       });
