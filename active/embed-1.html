@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UV Static v2 - Fullscreen Proxy</title>
+    <link rel="stylesheet" href="style/global.css" />
+    <link rel="stylesheet" href="style/browser.css" />
+    <script defer src="scripts/lstimer.js"></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/gh/vanjs-org/van/public/van-1.5.2.nomodule.min.js"
+    ></script>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
+    ></script>
+    <script src="uv/uv.bundle.js" defer></script>
+    <script src="uv/uv.config.js" defer></script>
+    <script src="scripts/tabs.mjs" type="module" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/gh/tf7software/Font-Awesome-pro-cdn@main/js/all.js"></script>
+    <style>
+      html, body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #18181a;
+      }
+      #full-uv-proxy {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #18181a;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+      }
+      #uv-full-iframe {
+        width: 100vw;
+        height: 100vh;
+        border: none;
+        background: #18181a;
+        flex: 1 1 0%;
+        min-height: 0;
+        min-width: 0;
+        display: block;
+      }
+      #uv-full-form {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1;
+        opacity: 0;
+        pointer-events: none;
+      }
+      #uv-full-form input,
+      #uv-full-form button {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Hidden Form for compatibility -->
+    <form id="uv-full-form" autocomplete="off" tabindex="-1">
+      <input type="text" id="uv-full-input" name="url" autocomplete="off" />
+      <button type="submit" id="uv-full-submit"></button>
+    </form>
+    <!-- Fullscreen Proxy Box -->
+    <div id="full-uv-proxy">
+      <iframe
+        id="uv-full-iframe"
+        title="Proxy"
+        src=""
+        allow="autoplay; fullscreen"
+      ></iframe>
+    </div>
+    <script>
+      // Util: UV encode logic from index.html
+      function encodeUrl(url) {
+        if (window.__uv$config && window.__uv$config.encodeUrl) {
+          return window.__uv$config.encodeUrl(url);
+        }
+        // fallback base64
+        return btoa(unescape(encodeURIComponent(url)));
+      }
+      function getProxyPrefix() {
+        if (window.__uv$config && window.__uv$config.prefix)
+          return window.__uv$config.prefix;
+        return "/service/";
+      }
+      function getQueryUrl() {
+        const q = window.location.search.replace(/^\?/, '');
+        if (q && (q.startsWith("http://") || q.startsWith("https://"))) {
+          return decodeURIComponent(q);
+        }
+        return '';
+      }
+      function loadProxied(url) {
+        // Set hidden input for compatibility (if scripts expect it)
+        document.getElementById('uv-full-input').value = url;
+        // Set iframe src using UV encode and prefix
+        const prefix = getProxyPrefix();
+        const encoded = encodeUrl(url);
+        document.getElementById('uv-full-iframe').src = prefix + encoded;
+      }
+      window.addEventListener("DOMContentLoaded", function() {
+        const url = getQueryUrl();
+        if (url) {
+          loadProxied(url);
+        }
+      });
+    </script>
+  </body>
+</html>
