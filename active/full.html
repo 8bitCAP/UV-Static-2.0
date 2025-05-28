@@ -20,6 +20,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
         }
         p {
             margin-left: 10px;
@@ -43,61 +44,108 @@
             0% { transform: rotate(0deg);}
             100% { transform: rotate(360deg);}
         }
+        #full-uv-proxy, #uv-full-iframe {
+            width: 100vw !important;
+            height: 100vh !important;
+            min-width: 0;
+            min-height: 0;
+        }
+        #full-uv-proxy {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #18181a;
+            z-index: 10;
+            display: none; /* Hide until ready */
+            flex-direction: column;
+        }
+        #uv-full-iframe {
+            border: none;
+            background: #18181a;
+            flex: 1 1 0%;
+            display: block;
+        }
+        #uv-full-form {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #uv-full-form input,
+        #uv-full-form button {
+            display: none;
+        }
     </style>
 </head>
 <body>
+    <!-- Spinner Loader -->
     <div id="loadingbox">
         <div id="main">
             <span class="loader"></span>
             <p>Loading Embed...</p>
         </div>
     </div>
+
+    <!-- Hidden Proxy Form (for compatibility) -->
+    <form id="uv-full-form" autocomplete="off" tabindex="-1">
+      <input type="text" id="uv-full-input" name="url" autocomplete="off" />
+      <button type="submit" id="uv-full-submit"></button>
+    </form>
+    <!-- Fullscreen Proxy Box (hidden until ready) -->
+    <div id="full-uv-proxy">
+      <iframe
+        id="uv-full-iframe"
+        title="Proxy"
+        src=""
+        allow="autoplay; fullscreen"
+      ></iframe>
+    </div>
     <script>
-        // UV Static logic: Load proxy after a short delay if there's a ?url
-        function getQueryUrl() {
-            const q = window.location.search.replace(/^\?/, '');
-            if (q && (q.startsWith("http://") || q.startsWith("https://"))) {
-                return decodeURIComponent(q);
-            }
-            return '';
+      // Util: UV encode logic from index.html
+      function encodeUrl(url) {
+        if (window.__uv$config && window.__uv$config.encodeUrl) {
+          return window.__uv$config.encodeUrl(url);
         }
-        function encodeUrl(url) {
-            if (window.__uv$config && window.__uv$config.encodeUrl) {
-                return window.__uv$config.encodeUrl(url);
-            }
-            // fallback base64
-            return btoa(unescape(encodeURIComponent(url)));
+        // fallback base64
+        return btoa(unescape(encodeURIComponent(url)));
+      }
+      function getProxyPrefix() {
+        if (window.__uv$config && window.__uv$config.prefix)
+          return window.__uv$config.prefix;
+        return "/service/";
+      }
+      function getQueryUrl() {
+        const q = window.location.search.replace(/^\?/, '');
+        if (q && (q.startsWith("http://") || q.startsWith("https://"))) {
+          return decodeURIComponent(q);
         }
-        function getProxyPrefix() {
-            if (window.__uv$config && window.__uv$config.prefix)
-                return window.__uv$config.prefix;
-            return "/service/";
-        }
-        function loadProxied(url) {
-            // Remove loading screen
+        return '';
+      }
+      function loadProxied(url) {
+        // Set hidden input for compatibility (if scripts expect it)
+        document.getElementById('uv-full-input').value = url;
+        // Set iframe src using UV encode and prefix
+        const prefix = getProxyPrefix();
+        const encoded = encodeUrl(url);
+        document.getElementById('uv-full-iframe').src = prefix + encoded;
+      }
+      window.addEventListener("DOMContentLoaded", function() {
+        const url = getQueryUrl();
+        if (url) {
+          // Show spinner for a moment to simulate loading
+          setTimeout(() => {
+            // Hide spinner, show proxy
             document.getElementById('loadingbox').style.display = 'none';
-            // Create fullscreen iframe
-            const prefix = getProxyPrefix();
-            const encoded = encodeUrl(url);
-            const iframe = document.createElement('iframe');
-            iframe.src = prefix + encoded;
-            iframe.style.position = 'fixed';
-            iframe.style.top = '0';
-            iframe.style.left = '0';
-            iframe.style.width = '100vw';
-            iframe.style.height = '100vh';
-            iframe.style.border = 'none';
-            iframe.style.background = '#18181a';
-            iframe.allow = 'autoplay; fullscreen';
-            iframe.id = 'uv-full-iframe';
-            document.body.appendChild(iframe);
+            document.getElementById('full-uv-proxy').style.display = 'flex';
+            loadProxied(url);
+          }, 400); // spinner stays for at least 400ms
         }
-        window.addEventListener("DOMContentLoaded", function() {
-            const url = getQueryUrl();
-            if (url) {
-                setTimeout(() => loadProxied(url), 350); // short delay for loader visibility
-            }
-        });
+      });
     </script>
 </body>
 </html>
